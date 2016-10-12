@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title></title>
 
-    <link rel="manifest" href="manifest.json">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+	<title></title>
 
-    <!-- un-comment this code to enable service worker
+	<link rel="manifest" href="manifest.json">
+
+	<!-- un-comment this code to enable service worker
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js')
@@ -17,27 +18,37 @@
     </script>-->
 
 
-    <!-- compiled css output -->
-    <link href="css/ionic.app.css" rel="stylesheet">
+	<!-- compiled css output -->
+	<link href="css/ionic.app.css" rel="stylesheet">
 
-    <!-- ionic/angularjs js -->
-    <script src="lib/ionic/js/ionic.bundle.js"></script>
+	<!-- ionic/angularjs js -->
+	<script src="lib/ionic/js/ionic.bundle.js"></script>
 
-    <script src="lib/ngCordova/dist/ng-cordova.js"></script>
-    <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
+	<script src="lib/ngCordova/dist/ng-cordova.js"></script>
+	<!-- cordova script (this will be a 404 during development) -->
+	<script src="cordova.js"></script>
 
-    <!-- your app's js -->
-    <script src="js/app.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASNMmluZa70_l31mSw7bLClQf4mbKjZrA"></script>
+	<!-- your app's js -->
+	<script src="js/app.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASNMmluZa70_l31mSw7bLClQf4mbKjZrA"></script>
+</head>
 
-  </head>
-<body ng-app="starter">
-  <ion-pane>
-    <ion-header-bar class="bar-stable">
-      <h1 class="title">Projet Web GPS</h1>
-    </ion-header-bar>
-    <ion-nav-view></ion-nav-view>
-  </ion-pane>
+<body ng-app="starter" ng-controller="MapCtrl">
+	<ion-side-menus>
+		<ion-side-menu side="left">
+		</ion-side-menu>
+		<ion-side-menu-content>
+			<ion-header-bar class="bar-dark">
+				<h1 class="title">Projet Web GPS</h1>
+			</ion-header-bar>
+			<ion-nav-view>
+			</ion-nav-view>
+			<ion-footer-bar class="bar-dark">
+				<a ng-click="centerOnMe()" class="button button-icon icon ion-navigate"> Localiser</a>
+				<a ng-click="signalement()" class="button button-icon icon ion-alert"> Signaler</a>
+			</ion-footer-bar>
+		</ion-side-menu-content>
+	</ion-side-menus>
 </body>
+
 </html>
