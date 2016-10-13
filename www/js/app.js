@@ -1,5 +1,4 @@
 // Ionic Starter App
-
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
@@ -12,7 +11,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
     function initMap() {
       console.log("fonction initMap");
-      var options = { timeout: 10000, enableHighAccuracy: true };
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
 
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -129,10 +131,9 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
       // On ajoute un callback à l'url de chargement de la map
       if (apiKey) {
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey
-          + '&libraries=places,geometry&callback=mapInit';
-      }
-      else {
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey +
+          '&libraries=places,geometry&callback=mapInit';
+      } else {
         script.src = 'https://maps.googleapis.com/maps/api/js?libraries=places,geometry&callback=mapInit';
       }
 
@@ -146,6 +147,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         enableMap();
       }
     }
+
     function addConnectivityListeners() {
 
       if (ionic.Platform.isWebView()) {
@@ -160,8 +162,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
           disableMap();
         });
 
-      }
-      else {
+      } else {
 
         // Section pour téléphone, pareil qu'au dessus
         window.addEventListener("online", function (e) {
@@ -191,8 +192,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
           if (ConnectivityMonitor.isOnline()) {
             loadGoogleMaps();
           }
-        }
-        else {
+        } else {
           if (ConnectivityMonitor.isOnline()) {
             initMap();
             enableMap();
@@ -231,7 +231,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
     function loadCurrentPosition() {
       console.log("fonction loadCurrentPosition");
-      var options = { timeout: 10000, enableHighAccuracy: true };
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         var positionActuelle = new google.maps.Marker({
@@ -313,7 +316,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
   })
 
-  .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover) {
+  .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate) {
     $scope.centerOnMe = function () {
       $scope.map = map;
       $ionicLoading.show({
@@ -321,7 +324,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
         showBackdrop: false
       });
 
-      var options = { timeout: 10000, enableHighAccuracy: true };
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         var positionActuelle = new google.maps.Marker({
@@ -351,7 +357,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
         showBackdrop: false
       });
 
-      var options = { timeout: 10000, enableHighAccuracy: true };
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         var image = 'img/alert.png';
@@ -383,6 +392,11 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }).then(function (popover) {
       $scope.popover = popover;
     });
+
+    // Side menu 
+    $scope.openMenu = function () {
+      $ionicSideMenuDelegate.toggleLeft();
+    };
   })
 
   .factory('Markers', function ($http) {
