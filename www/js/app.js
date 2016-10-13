@@ -47,7 +47,6 @@ angular.module('starter', ['ionic', 'ngCordova'])
         // Recherche de position et autocompletion
         var autocomplete = new google.maps.places.Autocomplete(input);
         autocomplete.bindTo('bounds', window.map);
-        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
         var infowindow = new google.maps.InfoWindow();
         var marker = new google.maps.Marker({
           map: map
@@ -185,8 +184,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
         if (typeof google == "undefined" || typeof google.maps == "undefined") {
 
-          console.warn("Le SDK Google Maps doit être chargé");
-
+          console.warn("Le SDK Google Maps doit être chargé...");
           disableMap();
 
           if (ConnectivityMonitor.isOnline()) {
@@ -300,7 +298,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         StatusBar.styleDefault();
       }
       console.log("début init gmaps");
-      GoogleMaps.init();
+      // GoogleMaps.init();
     });
   })
 
@@ -397,17 +395,18 @@ angular.module('starter', ['ionic', 'ngCordova'])
     $scope.openMenu = function () {
       $ionicSideMenuDelegate.toggleLeft();
     };
+
   })
 
   .factory('Markers', function ($http) {
-    var markers = [];
-    return {
-      getMarkers: function () {
-        return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
-          markers = response;
-          return markers;
-        });
+  var markers = [];
+  return {
+    getMarkers: function () {
+      return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
+        markers = response;
+        return markers;
+      });
 
-      }
     }
-  });
+  }
+});
