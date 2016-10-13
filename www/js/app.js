@@ -298,7 +298,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         StatusBar.styleDefault();
       }
       console.log("début init gmaps");
-      // GoogleMaps.init();
+      GoogleMaps.init();
     });
   })
 
@@ -396,17 +396,28 @@ angular.module('starter', ['ionic', 'ngCordova'])
       $ionicSideMenuDelegate.toggleLeft();
     };
 
+    // Gestion liste autocompletion sur android
+    $scope.disableTap = function () {
+      var container = document.getElementsByClassName('pac-container');
+      angular.element(container).attr('data-tap-disabled', 'true');
+      var backdrop = document.getElementsByClassName('backdrop');
+      angular.element(backdrop).attr('data-tap-disabled', 'true');
+      angular.element(container).on("click", function () {
+        document.getElementById('pac-input').blur();
+      });
+    };
+
   })
 
   .factory('Markers', function ($http) {
-  var markers = [];
-  return {
-    getMarkers: function () {
-      return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
-        markers = response;
-        return markers;
-      });
+    var markers = [];
+    return {
+      getMarkers: function () {
+        return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
+          markers = response;
+          return markers;
+        });
 
+      }
     }
-  }
-});
+  });
