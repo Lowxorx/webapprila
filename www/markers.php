@@ -1,4 +1,6 @@
 <?php
+
+header("Access-Control-Allow-Origin: *");
  
   //Create a connection to the database
   $mysqli = new mysqli("localhost", "root", "", "projetwebrila");
