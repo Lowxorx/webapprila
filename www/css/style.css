@@ -26,7 +26,6 @@ width: 90%;
 margin-bottom: 0;
 line-height: 15px;
 font-weight: bold;
-margin-left: 10%;
 }
 #pac-input:focus {
 border-color: #4d90fe;
@@ -67,3 +66,18 @@ transition: all 1s ease-out;
   padding: 5px 20px;
 }
 
+hr.separator:after {
+background: none repeat scroll 0% 0% #000;
+content: "";
+height: 10px;
+left: 50%;
+margin: -5px auto auto -5px;
+position: absolute;
+transform: rotate(-45deg);
+width: 10px;
+}
+hr.separator {
+border-top: 1px solid #000;
+width: 50%;
+clear: both;
+}  
