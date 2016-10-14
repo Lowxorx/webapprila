@@ -1,4 +1,4 @@
-<ion-view ng-controller="MapCtrl">
+<ion-view ng-controller="GuestMapCtrl">
 	<ion-side-menus>
 		<!-- Contenu de la page principale Projet Web GPS-->
 		<ion-side-menu-content>
@@ -17,7 +17,7 @@
 			</ion-content>
 			<ion-footer-bar class="bar-balanced">
 				<a ng-click="centerOnMe()" class="button button-icon icon ion-navigate"> Localiser</a>
-				<a ng-click="popover.show($event)" class="button button-icon icon ion-alert"> Signaler</a>
+				<a ng-click="showAlert();" class="button button-icon icon ion-alert"> Signaler</a>
 			</ion-footer-bar>
 		</ion-side-menu-content>
 		<!-- Contenu du side menu -->
@@ -33,7 +33,7 @@
 				</div>
 				<div class="list">
 					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-ios-home">Connexion </a>
+						<a ng-click="showLogin()" menu-close class="button button-icon icon-left ion-ios-home">Connexion </a>
 					</div>
 					<div class="item">
 						<a menu-close class="button button-icon icon-left ion-android-settings">Paramètres</a>

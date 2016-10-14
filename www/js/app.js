@@ -5,7 +5,7 @@
 angular.module('starter', ['ionic', 'ngCordova'])
 
   .factory('GoogleMaps', function ($cordovaGeolocation, $ionicLoading,
-    $rootScope, $cordovaNetwork, Markers, ConnectivityMonitor, $compile) {
+    $rootScope, $cordovaNetwork, Markers, ConnectivityMonitor, $compile, $ionicSideMenuDelegate) {
     var markers = [];
     var apiKey = 'AIzaSyASNMmluZa70_l31mSw7bLClQf4mbKjZrA';
 
@@ -54,6 +54,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
         // Détails de la position sélectionnée dans la recherche
         google.maps.event.addListener(autocomplete, 'place_changed', function () {
+          $ionicSideMenuDelegate.toggleLeft();
           infowindow.close();
           var place = autocomplete.getPlace();
           if (!place.geometry) {
@@ -288,7 +289,20 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }
   })
 
-  .run(function ($ionicPlatform, GoogleMaps) {
+  .factory('Markers', function ($http) {
+    var markers = [];
+    return {
+      getMarkers: function () {
+        return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
+          markers = response;
+          return markers;
+        });
+
+      }
+    }
+  })
+
+  .run(function ($ionicPlatform) {
     $ionicPlatform.ready(function () {
       if (window.cordova && window.cordova.plugins.Keyboard) {
         cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -298,23 +312,46 @@ angular.module('starter', ['ionic', 'ngCordova'])
         StatusBar.styleDefault();
       }
       console.log("début init gmaps");
-      GoogleMaps.init();
     });
   })
 
   .config(function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider
+      .state('login', {
+        url: '/',
+        templateUrl: 'templates/login.html',
+        controller: 'loginCtrl'
+      })
       .state('map', {
         url: '/',
         templateUrl: 'templates/map.html',
         controller: 'MapCtrl'
+      })
+      .state('guestmap', {
+        url: '/',
+        templateUrl: 'templates/guestmap.html',
+        controller: 'GuestMapCtrl'
       });
     $urlRouterProvider.otherwise("/");
 
   })
 
+  .controller('loginCtrl', function ($scope, $state, GoogleMaps) {
+    console.log("signal controleur login")
+    $scope.signIn = function (user) {
+      $state.go('map');
+      GoogleMaps.init();
+    };
+    $scope.guestSignIn = function () {
+      $state.go('guestmap');
+      GoogleMaps.init();
+    }
+
+  })
+
   .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate) {
+    console.log('ctrl map');
     $scope.centerOnMe = function () {
       $scope.map = map;
       $ionicLoading.show({
@@ -391,7 +428,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
       $scope.popover = popover;
     });
 
-    // Side menu 
+    // Side menu (ouverture et fermeture)
     $scope.openMenu = function () {
       $ionicSideMenuDelegate.toggleLeft();
     };
@@ -406,18 +443,72 @@ angular.module('starter', ['ionic', 'ngCordova'])
         document.getElementById('pac-input').blur();
       });
     };
-
   })
 
-  .factory('Markers', function ($http) {
-    var markers = [];
-    return {
-      getMarkers: function () {
-        return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
-          markers = response;
-          return markers;
-        });
+  .controller('GuestMapCtrl', function ($scope, $state, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopup, $ionicSideMenuDelegate) {
+    console.log('ctrl guestmap');
+    $scope.centerOnMe = function () {
+      $scope.map = map;
+      $ionicLoading.show({
+        content: 'Recherche de la position actuelle',
+        showBackdrop: false
+      });
 
-      }
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
+      $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        var positionActuelle = new google.maps.Marker({
+          map: map,
+          animation: google.maps.Animation.DROP,
+          position: latLng
+        });
+        $scope.map.setCenter(latLng);
+        $ionicLoading.hide();
+
+        var infoWindow = new google.maps.InfoWindow({
+          content: "test"
+        });
+        google.maps.event.addListener(positionActuelle, 'click', function (event) {
+          infoWindow.open(map, positionActuelle);
+        })
+      }, function (error) {
+        alert('Unable to get location: ' + error.message);
+      });
     }
+
+    // Bouton signalement
+    $scope.showAlert = function () {
+      var alertPopup = $ionicPopup.alert({
+        title: 'Information',
+        template: 'Vous devez vous connecter pour signaler un évènement.'
+      });
+      alertPopup.then(function (res) {
+        console.log('Thank you for not eating my delicious ice cream cone');
+      });
+    }
+
+    // Bouton connexion
+    $scope.showLogin = function () {
+      $state.go('login');
+    }
+
+    // Side menu (ouverture et fermeture)
+    $scope.openMenu = function () {
+      $ionicSideMenuDelegate.toggleLeft();
+    };
+
+    // Gestion liste autocompletion sur android
+    $scope.disableTap = function () {
+      var container = document.getElementsByClassName('pac-container');
+      angular.element(container).attr('data-tap-disabled', 'true');
+      var backdrop = document.getElementsByClassName('backdrop');
+      angular.element(backdrop).attr('data-tap-disabled', 'true');
+      angular.element(container).on("click", function () {
+        document.getElementById('pac-input').blur();
+      });
+    };
   });
+
