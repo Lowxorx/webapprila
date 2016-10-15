@@ -1,32 +1,37 @@
-<ion-view view-title="Sign-In" ng-controller="loginCtrl" name="login-view">
+<ion-view view-title="Connexion" ng-controller="loginCtrl" name="login-view">
 	<ion-header-bar class="bar bar-header bar-balanced" align-title="center">
 		<h1 class="title">Projet Web GPS</h1>
 	</ion-header-bar>
 	<ion-content has-header="true">
 		<br>
 		<br>
-		<div class="list">
+		<div>
 			<label class="item item-input">
               <span class="input-label">Nom d'utilisateur</span>
-              <input type="text" ng-model="user.username">
+              <input class="form-control" type="text" name="username" ng-model="data.username">
             </label>
 			<label class="item item-input">
               <span class="input-label">Mot de Passe</span>
-              <input type="password" ng-model="user.password">
+              <input class="form-control" type="password" name="password" ng-model="data.password">
             </label>
+			<br>
 		</div>
-
-		<br>
 		<div class="padding">
-			<button class="button button-block button-balanced" ng-click="signIn(user)">
+			<button class="button button-block button-balanced" ng-click="login(data)">
               Se connecter
             </button>
+
 			<br>
 			<hr class="separator">
 			<br>
 			<button class="button button-block button-dark" ng-click="guestSignIn()">
               Invité
             </button>
+		</div>
+		<div class="card">
+			<div class="item item-text-wrap">
+				Response: <b ng-bind="response"></b>
+			</div>
 		</div>
 	</ion-content>
 	<ion-footer-bar class="bar-balanced">

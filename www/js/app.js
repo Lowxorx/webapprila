@@ -289,6 +289,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }
   })
 
+  // Factory récupération des marqueurs d'alerte depuis la bdd
   .factory('Markers', function ($http) {
     var markers = [];
     return {
@@ -301,6 +302,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
       }
     }
   })
+
 
   .run(function ($ionicPlatform) {
     $ionicPlatform.ready(function () {
@@ -337,7 +339,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
   })
 
-  .controller('loginCtrl', function ($scope, $state, GoogleMaps) {
+  .controller('loginCtrl', function ($scope, $state, GoogleMaps, $http) {
     console.log("signal controleur login")
     $scope.signIn = function (user) {
       $state.go('map');
@@ -348,6 +350,22 @@ angular.module('starter', ['ionic', 'ngCordova'])
       GoogleMaps.init();
     }
 
+    $scope.login = function (data) {
+      var request = $http({
+        method: "get",
+        url: "http://localhost/projetwebrila/www/db.php?username=" + data.username + "&password=" + data.password,
+        crossDomain: true,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        /*data: {
+          username: data.username,
+          password: data.password
+        },*/
+      });
+      console.log(data);
+      request.success(function (res) {
+        $scope.response = res.data;
+      });
+    }
   })
 
   .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate) {
