@@ -2,29 +2,38 @@
     header("Content-Type: application/json; charset=UTF-8");
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST');
+
+    define('_HOST_NAME_', 'localhost');
+    define('_USER_NAME_', 'root');
+    define('_DB_PASSWORD', '');
+    define('_DATABASE_NAME_', 'projetwebrila');
     
-   /* $postdata = file_get_contents("php://input");
+    try
+    {
+        $databaseConnection = new PDO('mysql:host='._HOST_NAME_.';dbname='._DATABASE_NAME_, _USER_NAME_, _DB_PASSWORD);
+        $databaseConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } 
+    catch(PDOException $e) 
+    {
+        echo 'ERROR: ' . $e->getMessage();
+    }
+
+    $return = "{\"success\":false}";
+    $postdata = file_get_contents("php://input");
     $request = json_decode($postdata);
     $password = $request->password;
-    $username = $request->username;*/
+    $username = $request->username;
 
-    //Create a connection to the database
-    $mysqli = new mysqli("localhost", "root", "", "projetwebrila");
-    $result = "{'success':false}";
-    $query = "SELECT * FROM testusers WHERE username = $username AND password = $password";
- 
-    //Run the query
-    $dbresult = $mysqli->query($query);
- 
-    if (mysql_num_rows($dbresult) == 1){
+    $result = $databaseConnection->prepare("SELECT * FROM testusers WHERE username= :usr AND password= :pw");
+    $result->bindParam(':usr', $username);
+    $result->bindParam(':pw', $password);
+    $result->execute();
+    $rows = $result->fetch(PDO::FETCH_NUM);
 
-        $result = "{\"success\":true}";        
-    }
-    else
+    if($rows > 0)
     {
-      $result = "{\"success\":false}";
+        $return = "{\"success\":true}";
     }
 
-    //Output the result to the browser so that our Ionic application can see the data
-    echo($result);
+    echo($return)
 ?>

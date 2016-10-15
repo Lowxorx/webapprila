@@ -339,12 +339,9 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
   })
 
-  .controller('loginCtrl', function ($scope, $state, GoogleMaps, $http) {
+  .controller('loginCtrl', function ($scope, $state, GoogleMaps, $http, $timeout) {
     console.log("signal controleur login")
-    $scope.signIn = function (user) {
-      $state.go('map');
-      GoogleMaps.init();
-    };
+
     $scope.guestSignIn = function () {
       $state.go('guestmap');
       GoogleMaps.init();
@@ -352,18 +349,26 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
     $scope.login = function (data) {
       var request = $http({
-        method: "get",
-        url: "http://localhost/projetwebrila/www/db.php?username=" + data.username + "&password=" + data.password,
+        method: "post",
+        url: "http://localhost/projetwebrila/www/db.php",
         crossDomain: true,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        /*data: {
+        data: {
           username: data.username,
           password: data.password
-        },*/
+        },
       });
-      console.log(data);
       request.success(function (res) {
-        $scope.response = res.data;
+        if (res.success){
+          $scope.response = "Authentification réussie ! Redirection en cours...";
+            $timeout(function() {
+            $state.go('map');
+            GoogleMaps.init();
+            }, 3000)
+        }
+        else{
+          $scope.response = "Nom d'utilisateur ou mot de passe incorrect !";
+        }
       });
     }
   })
