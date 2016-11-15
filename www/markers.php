@@ -1,7 +1,8 @@
 <?php
   //Create a connection to the database
-  $mysqli = new mysqli("localhost", "root", "", "projetwebrila");
- 
+  //$mysqli = new mysqli("localhost", "root", "", "projetwebrila");
+  $mysqli = new mysqli("10.192.5.106", "root", "", "projetwebrila");
+  
   //The default result to be output to the browser
   $result = "{'success':false}";
  
