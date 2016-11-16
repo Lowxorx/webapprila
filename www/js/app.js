@@ -222,7 +222,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
             position: markerPos
           });
 
-          var infoWindowContent = "<h4>" + record.name + "</h4>";
+          var infoWindowContent = "<h4>" + record.name + " - " + record.typeAlerte + " - " + record.user + "</h4>";
           addInfoWindow(marker, infoWindowContent, record);
         }
       });
@@ -339,7 +339,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
   })
 
-  .controller('loginCtrl', function ($scope, $state, GoogleMaps, $http, $timeout) {
+  .controller('loginCtrl', function ($scope, $state, GoogleMaps, $http, $timeout, $window, $ionicPopup) {
     console.log("signal controleur login")
 
     $scope.guestSignIn = function () {
@@ -359,21 +359,25 @@ angular.module('starter', ['ionic', 'ngCordova'])
         },
       });
       request.success(function (res) {
-        if (res.success){
-          $scope.response = "Authentification réussie ! Redirection en cours...";
-            $timeout(function() {
+        if (res.success) {
+          $window.localStorage.setItem("loginStatus", "true");
+          $window.localStorage.setItem("loginUsr", data.username);
+          $timeout(function () {
             $state.go('map');
             GoogleMaps.init();
-            }, 3000)
+          }, 2000)
         }
-        else{
-          $scope.response = "Nom d'utilisateur ou mot de passe incorrect !";
+        else {
+          $ionicPopup.alert({
+            title: 'Information',
+            template: "Nom d'utilisateur ou mot de passe incorrect"
+          })
         }
       });
     }
   })
 
-  .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate) {
+  .controller('MapCtrl', function ($scope, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $window, $http) {
     console.log('ctrl map');
     $scope.centerOnMe = function () {
       $scope.map = map;
@@ -403,9 +407,23 @@ angular.module('starter', ['ionic', 'ngCordova'])
           infoWindow.open(map, positionActuelle);
         })
       }, function (error) {
-        alert('Unable to get location: ' + error.message);
+        alert('Impossible de vous localiser !' + error.message);
       });
     }
+
+    $scope.logout = function () {
+      $ionicLoading.show({ template: 'Déconnexion ...' });
+      $timeout(function () {
+        $window.localStorage.setItem("loginStatus", "false");
+        $window.localStorage.setItem("loginUsr", "");
+        $ionicLoading.hide();
+        $ionicHistory.clearCache();
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({ disableBack: true, historyRoot: true });
+        $state.go('login');
+      }, 30);
+
+    };
 
     // Controleur btn signalement
     $scope.signalement = function () {
@@ -438,7 +456,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         $scope.map.setCenter(latLng);
         $ionicLoading.hide();
       }, function (error) {
-        alert('Unable to get location: ' + error.message);
+        alert('Impossible de vous localiser !' + error.message);
       });
     }
 
@@ -450,6 +468,60 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }).then(function (popover) {
       $scope.popover = popover;
     });
+
+    // Signalement accident
+    $scope.signalAccident = function () {
+      var request = $http({
+        method: "post",
+        url: "http://localhost/projetwebrila/www/addalert.php",
+        crossDomain: true,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        data: {
+          name: "Accident",
+          lat: "test",
+          lng: "test",
+          typeAlerte: "test",
+          user: $window.localStorage.getItem("loginUsr")
+        },
+      });
+      request.success(function (res) {
+        if (res.success) {
+          $ionicPopup.alert({
+            title: 'Information',
+            template: "Accident signalé avec succès !"
+          })
+        }
+        else {
+          $ionicPopup.alert({
+            title: 'Erreur',
+            template: "Impossible de signaler l'accident"
+          })
+        }
+      });
+    };
+
+    // Signalement radar
+    $scope.signalRadar = function () {
+      console.log("radar");
+    };
+
+    // Signalement trafic
+    $scope.signalTrafic = function () {
+      console.log("trafic");
+    };
+
+    // Signalement autre
+    $scope.signalOther = function () {
+      console.log("autre");
+    };
+
+    // Signalement autre
+    $scope.signalOther = function () {
+      console.log("autre");
+    };
+
+
+
 
     // Side menu (ouverture et fermeture)
     $scope.openMenu = function () {
@@ -509,7 +581,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         template: 'Vous devez vous connecter pour signaler un évènement.'
       });
       alertPopup.then(function (res) {
-        console.log('Thank you for not eating my delicious ice cream cone');
+        console.log('après popup');
       });
     }
 

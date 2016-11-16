@@ -20,7 +20,9 @@
       'id' => $row['id'],
       'name' => $row['name'],
       'lat' => $row['lat'],
-      'lng' => $row['lng']
+      'lng' => $row['lng'],
+      'typeAlerte' => $row['typeAlerte'],
+      'user' => $row['user']
     );
   }
  

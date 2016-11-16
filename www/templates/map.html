@@ -1,4 +1,4 @@
-<ion-view ng-controller="MapCtrl">
+<ion-view view-title="Navigation - Projet Web Rila" ng-controller="MapCtrl">
 	<ion-side-menus>
 		<!-- Contenu de la page principale Projet Web GPS-->
 		<ion-side-menu-content>
@@ -33,13 +33,13 @@
 				</div>
 				<div class="list">
 					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-ios-home">Connexion </a>
+						<a ng-click="logout()" menu-close class="button button-icon icon-left ion-ios-home">Déconnexion </a>
 					</div>
 					<div class="item">
 						<a menu-close class="button button-icon icon-left ion-android-settings">Paramètres</a>
 					</div>
 					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-flag">Autre</a>
+						<a menu-close class="button button-icon icon-left ion-person">Mon Compte</a>
 					</div>
 					<div class="item">
 						<a menu-close class="button button-icon icon-left ion-flag">Autre</a>
