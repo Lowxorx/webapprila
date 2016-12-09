@@ -39,8 +39,6 @@
     else{
         $return = "{\"success\":false}";
     }
- 
-    
 
     echo($return)
 ?>
