@@ -7,5 +7,8 @@
   "dependencies": {
     "ng-material-floating-button": "ng-mfb#^0.6.2",
     "angular-mocks": "^1.5.8"
+  },
+  "resolutions": {
+    "angular": "1.6.0"
   }
 }
