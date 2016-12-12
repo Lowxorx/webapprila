@@ -26,13 +26,15 @@
     $lng = $request->lng;
     $typeAlerte = $request->typeAlerte;
     $user = $request->user;
+    $icon = $request->icon;
 
-    $result = $databaseConnection->prepare("INSERT INTO testmarqueurs (name, lat, lng, typeAlerte, user) VALUES (:name, :lat, :lng, :typeAlerte, :user)");
+    $result = $databaseConnection->prepare("INSERT INTO testmarqueurs (name, lat, lng, typeAlerte, user, icon) VALUES (:name, :lat, :lng, :typeAlerte, :user, :icon)");
     $result->bindParam(':name', $name);
     $result->bindParam(':lat', $lat);
     $result->bindParam(':lng', $lng);
     $result->bindParam(':typeAlerte', $typeAlerte);
     $result->bindParam(':user', $user);
+    $result->bindParam(':icon', $icon);
     if ($result->execute()){
         $return = "{\"success\":true}";
     }

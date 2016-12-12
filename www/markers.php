@@ -22,7 +22,8 @@
       'lat' => $row['lat'],
       'lng' => $row['lng'],
       'typeAlerte' => $row['typeAlerte'],
-      'user' => $row['user']
+      'user' => $row['user'],
+      'icon' => $row['icon']
     );
   }
  

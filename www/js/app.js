@@ -3,377 +3,380 @@
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic', 'ngCordova'])
+  // Chargement de la carte depuis gmaps
+  .factory('GoogleMaps', function ($cordovaGeolocation, $ionicLoading,
+    $rootScope, $cordovaNetwork, Markers, ConnectivityMonitor, $compile, $ionicSideMenuDelegate) {
+    var markers = [];
+    var apiKey = 'AIzaSyASNMmluZa70_l31mSw7bLClQf4mbKjZrA';
 
-.factory('GoogleMaps', function ($cordovaGeolocation, $ionicLoading,
-  $rootScope, $cordovaNetwork, Markers, ConnectivityMonitor, $compile, $ionicSideMenuDelegate) {
-  var markers = [];
-  var apiKey = 'AIzaSyASNMmluZa70_l31mSw7bLClQf4mbKjZrA';
-
-  function initMap() {
-    console.log("fonction initMap");
-    var options = {
-      timeout: 10000,
-      enableHighAccuracy: true
-    };
-
-    $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-      var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      var mapOptions = {
-        center: latLng,
-        zoom: 15,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+    function initMap() {
+      console.log("fonction initMap");
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
       };
 
-      // Création de la map 
-      window.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        var mapOptions = {
+          center: latLng,
+                  disableDefaultUI: true,
 
-      // Création de marqueur lors d'un clic et affichage des infos
-      var clicInfoWindow = new google.maps.InfoWindow();
-      map.addListener('click', function (event) {
-        clearMarkers();
+          zoom: 15,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        // Création de la map 
+        window.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+        // Création de marqueur lors d'un clic et affichage des infos
+        var clicInfoWindow = new google.maps.InfoWindow();
+        map.addListener('click', function (event) {
+          clearMarkers();
+          var marker = new google.maps.Marker({
+            position: event.latLng,
+            map: map,
+            icon: "img/marker.png"
+          });
+          // Ajout de marqueurs à la liste des marqueurs utilisateur
+          markers.push(marker);
+          clicInfoWindow.setContent('<div><strong>Position personnalisée</strong><br>' +
+            'GPS: ' + event.latLng + '<br>');
+          clicInfoWindow.open(map, marker);
+        });
+
+        var input = /** @type {HTMLInputElement} */ (
+          document.getElementById('pac-input'));
+        // Recherche de position et autocompletion
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', window.map);
+        var infowindow = new google.maps.InfoWindow();
         var marker = new google.maps.Marker({
-          position: event.latLng,
           map: map
         });
-        // Ajout de marqueurs à la liste des marqueurs utilisateur
-        markers.push(marker);
-        clicInfoWindow.setContent('<div><strong>Position personnalisée</strong><br>' +
-          'GPS: ' + event.latLng + '<br>');
-        clicInfoWindow.open(map, marker);
-      });
 
-      var input = /** @type {HTMLInputElement} */ (
-        document.getElementById('pac-input'));
-      // Recherche de position et autocompletion
-      var autocomplete = new google.maps.places.Autocomplete(input);
-      autocomplete.bindTo('bounds', window.map);
-      var infowindow = new google.maps.InfoWindow();
-      var marker = new google.maps.Marker({
-        map: map
-      });
+        // Détails de la position sélectionnée dans la recherche
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
 
-      // Détails de la position sélectionnée dans la recherche
-      google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        $ionicSideMenuDelegate.toggleLeft();
-        infowindow.close();
-        var place = autocomplete.getPlace();
-        if (!place.geometry) {
-          return;
-        }
-        if (place.geometry.viewport) {
-          map.fitBounds(place.geometry.viewport);
-        } else {
-          map.setCenter(place.geometry.location);
-          map.setZoom(17);
-        }
-        // Centre la map lors de la sélection d'une position proposée
-        marker.setPlace(({
-          placeId: place.place_id,
-          location: place.geometry.location
-        }));
-        marker.setVisible(true);
-        infowindow.setContent('<div><strong>' + place.name + '</strong><br>' +
-          'Place ID: ' + place.place_id + '<br>' +
-          place.formatted_address + '</div>');
-        infowindow.open(map, marker);
-      });
+          infowindow.close();
+          var place = autocomplete.getPlace();
+          if (!place.geometry) {
+            return;
+          }
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);
+          }
+          // Centre la map lors de la sélection d'une position proposée
+          marker.setPlace(({
+            placeId: place.place_id,
+            location: place.geometry.location
+          }));
+          marker.setVisible(true);
+          infowindow.setContent('<div><strong>' + place.name + '</strong><br>' +
+            'Place ID: ' + place.place_id + '<br>' +
+            place.formatted_address + '</div>');
+          infowindow.open(map, marker);
+        });
 
-      // Chargement de la map
-      google.maps.event.addListenerOnce(map, 'idle', function () {
+        // Chargement de la map
+        google.maps.event.addListenerOnce(map, 'idle', function () {
+          // Chargement des marqueurs
+          loadMarkers();
+          enableMap();
+          loadCurrentPosition();
+        });
+
+      }, function (error) {
+        console.log("Impossible de détecter votre position");
         // Chargement des marqueurs
         loadMarkers();
-        enableMap();
         loadCurrentPosition();
       });
 
-    }, function (error) {
-      console.log("Impossible de détecter votre position");
-      // Chargement des marqueurs
-      loadMarkers();
-      loadCurrentPosition();
-    });
-
-  }
-
-  function setMapOnAll(map) {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-    }
-  }
-
-  function clearMarkers() {
-    setMapOnAll(null);
-  }
-
-  function enableMap() {
-    $ionicLoading.hide();
-  }
-
-  function disableMap() {
-    $ionicLoading.show({
-      template: 'Vous devez vous connecter pour afficher la carte.'
-    });
-  }
-
-  function loadGoogleMaps() {
-    $ionicLoading.show({
-      template: 'Chargement de la carte...'
-    });
-    // Appel de la fonction une fois que le sdk est chargé
-    window.mapInit = function () {
-      initMap();
-    };
-
-    // Script à insérer dans la page
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.id = "googleMaps";
-
-    // On ajoute un callback à l'url de chargement de la map
-    if (apiKey) {
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey +
-        '&libraries=places,geometry&callback=mapInit';
-    } else {
-      script.src = 'https://maps.googleapis.com/maps/api/js?libraries=places,geometry&callback=mapInit';
     }
 
-    document.body.appendChild(script);
-  }
-
-  function checkLoaded() {
-    if (typeof google == "undefined" || typeof google.maps == "undefined") {
-      loadGoogleMaps();
-    } else {
-      enableMap();
-    }
-  }
-
-  function addConnectivityListeners() {
-
-    if (ionic.Platform.isWebView()) {
-
-      // On vérifie si la map est déjà chargée
-      $rootScope.$on('$cordovaNetwork:online', function (event, networkState) {
-        checkLoaded();
-      });
-
-      // Désactivation de la map quand la connection est perdue
-      $rootScope.$on('$cordovaNetwork:offline', function (event, networkState) {
-        disableMap();
-      });
-
-    } else {
-
-      // Section pour téléphone, pareil qu'au dessus
-      window.addEventListener("online", function (e) {
-        checkLoaded();
-      }, false);
-
-      window.addEventListener("offline", function (e) {
-        disableMap();
-      }, false);
-    }
-
-  }
-
-  return {
-    init: function (key) {
-
-      if (typeof key != "undefined") {
-        apiKey = key;
+    function setMapOnAll(map) {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(map);
       }
+    }
 
-      if (typeof google == "undefined" || typeof google.maps == "undefined") {
+    function clearMarkers() {
+      setMapOnAll(null);
+    }
 
-        console.warn("Le SDK Google Maps doit être chargé...");
-        disableMap();
+    function enableMap() {
+      $ionicLoading.hide();
+    }
 
-        if (ConnectivityMonitor.isOnline()) {
-          loadGoogleMaps();
-        }
+    function disableMap() {
+      $ionicLoading.show({
+        template: 'Vous devez vous connecter à internet pour afficher la carte.'
+      });
+    }
+
+    function loadGoogleMaps() {
+      $ionicLoading.show({
+        template: 'Chargement de la carte...'
+      });
+      // Appel de la fonction une fois que le sdk est chargé
+      window.mapInit = function () {
+        initMap();
+      };
+
+      // Script à insérer dans la page
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.id = "googleMaps";
+
+      // On ajoute un callback à l'url de chargement de la map
+      if (apiKey) {
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey +
+          '&libraries=places,geometry&callback=mapInit';
       } else {
-        if (ConnectivityMonitor.isOnline()) {
-          initMap();
-          enableMap();
-        } else {
-          disableMap();
-        }
+        script.src = 'https://maps.googleapis.com/maps/api/js?libraries=places,geometry&callback=mapInit';
       }
 
-      addConnectivityListeners();
-
+      document.body.appendChild(script);
     }
-  }
 
-  function loadMarkers() {
-    console.log("fonction loadMarkers");
-    // On récupère tout les marqueurs de la bdd
-    Markers.getMarkers().then(function (markers) {
-      console.log("Markers: ", markers);
-      var records = markers.data.markers;
-      for (var i = 0; i < records.length; i++) {
-        var record = records[i];
-        var markerPos = new google.maps.LatLng(record.lat, record.lng);
+    function checkLoaded() {
+      if (typeof google == "undefined" || typeof google.maps == "undefined") {
+        loadGoogleMaps();
+      } else {
+        enableMap();
+      }
+    }
 
-        // On les ajoute a la map
-        var marker = new google.maps.Marker({
-          map: map,
-          animation: google.maps.Animation.DROP,
-          position: markerPos
+    function addConnectivityListeners() {
+
+      if (ionic.Platform.isWebView()) {
+
+        // On vérifie si la map est déjà chargée
+        $rootScope.$on('$cordovaNetwork:online', function (event, networkState) {
+          checkLoaded();
         });
 
-        var infoWindowContent = "<h4>" + record.name + " - " + record.typeAlerte + " - " + record.user + "</h4>";
-        addInfoWindow(marker, infoWindowContent, record);
-      }
-    });
-  }
+        // Désactivation de la map quand la connection est perdue
+        $rootScope.$on('$cordovaNetwork:offline', function (event, networkState) {
+          disableMap();
+        });
 
-  function loadCurrentPosition() {
-    console.log("fonction loadCurrentPosition");
-    var options = {
-      timeout: 10000,
-      enableHighAccuracy: true
-    };
-    $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-      var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      var positionActuelle = new google.maps.Marker({
-        map: map,
-        animation: google.maps.Animation.DROP,
-        position: latLng
+      } else {
+
+        // Section pour téléphone, pareil qu'au dessus
+        window.addEventListener("online", function (e) {
+          checkLoaded();
+        }, false);
+
+        window.addEventListener("offline", function (e) {
+          disableMap();
+        }, false);
+      }
+
+    }
+
+    return {
+      init: function (key) {
+
+        if (typeof key != "undefined") {
+          apiKey = key;
+        }
+
+        if (typeof google == "undefined" || typeof google.maps == "undefined") {
+
+          console.warn("Le SDK Google Maps doit être chargé...");
+          disableMap();
+
+          if (ConnectivityMonitor.isOnline()) {
+            loadGoogleMaps();
+          }
+        } else {
+          if (ConnectivityMonitor.isOnline()) {
+            initMap();
+            enableMap();
+          } else {
+            disableMap();
+          }
+        }
+        addConnectivityListeners();
+      }
+    }
+
+    function loadMarkers() {
+      console.log("fonction loadMarkers");
+      // On récupère tout les marqueurs de la bdd
+      Markers.getMarkers().then(function (markers) {
+        console.log("Markers: ", markers);
+        var records = markers.data.markers;
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          var image = record.icon;
+          var markerPos = new google.maps.LatLng(record.lat, record.lng);
+
+          // On les ajoute a la map
+          var marker = new google.maps.Marker({
+            map: map,
+            icon: image,
+            animation: google.maps.Animation.DROP,
+            position: markerPos
+          });
+
+          var infoWindowContent = "<h4>" + record.name + " - " + record.typeAlerte + " - " + record.user + "</h4>";
+          addInfoWindow(marker, infoWindowContent);
+        }
       });
-      var infoWindow = new google.maps.InfoWindow({
-        content: "test"
-      });
-      google.maps.event.addListener(positionActuelle, 'click', function (event) {
-        infoWindow.open(map, positionActuelle);
+    }
+
+    function loadCurrentPosition() {
+      console.log("fonction loadCurrentPosition");
+      var options = {
+        timeout: 10000,
+        enableHighAccuracy: true
+      };
+      $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        var positionActuelle = new google.maps.Marker({
+          map: map,
+          animation: google.maps.Animation.DROP,
+          position: latLng
+        });
+        var infoWindow = new google.maps.InfoWindow({
+          content: "test"
+        });
+        google.maps.event.addListener(positionActuelle, 'click', function (event) {
+          infoWindow.open(map, positionActuelle);
+        })
       })
-    })
-  }
-
-  function addInfoWindow(marker, message, record) {
-    console.log("fonction addInfoWindow");
-    var infoWindow = new google.maps.InfoWindow({
-      content: message
-    });
-    google.maps.event.addListener(marker, 'click', function (event) {
-      infoWindow.open(map, marker);
-      var latitude = event.latLng.lat();
-      var longitude = event.latLng.lng();
-      // On centre la map
-      map.panTo(new google.maps.LatLng(latitude, longitude));
-    });
-  }
-
-})
-
-.factory('ConnectivityMonitor', function ($rootScope, $cordovaNetwork) {
-  return {
-    isOnline: function () {
-
-      if (ionic.Platform.isWebView()) {
-        return $cordovaNetwork.isOnline();
-      } else {
-        return navigator.onLine;
-      }
-
-    },
-    ifOffline: function () {
-
-      if (ionic.Platform.isWebView()) {
-        return !$cordovaNetwork.isOnline();
-      } else {
-        return !navigator.onLine;
-      }
-
     }
-  }
-})
 
-// Factory récupération des marqueurs d'alerte depuis la bdd
-.factory('Markers', function ($http) {
-  var markers = [];
-  return {
-    getMarkers: function () {
-      return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
-        markers = response;
-        return markers;
+    function addInfoWindow(marker, message) {
+      console.log("fonction addInfoWindow");
+      var infoWindow = new google.maps.InfoWindow({
+        content: message
       });
-
+      google.maps.event.addListener(marker, 'click', function (event) {
+        infoWindow.open(map, marker);
+        var latitude = event.latLng.lat();
+        var longitude = event.latLng.lng();
+        // On centre la map
+        map.panTo(new google.maps.LatLng(latitude, longitude));
+      });
     }
-  }
-})
+
+  })
+  // Surveillance de la connexion à internet
+  .factory('ConnectivityMonitor', function ($rootScope, $cordovaNetwork) {
+    return {
+      isOnline: function () {
+
+        if (ionic.Platform.isWebView()) {
+          return $cordovaNetwork.isOnline();
+        } else {
+          return navigator.onLine;
+        }
+
+      },
+      ifOffline: function () {
+
+        if (ionic.Platform.isWebView()) {
+          return !$cordovaNetwork.isOnline();
+        } else {
+          return !navigator.onLine;
+        }
+
+      }
+    }
+  })
+  // Factory récupération des marqueurs d'alerte depuis la bdd
+  .factory('Markers', function ($http) {
+    var markers = [];
+    return {
+      getMarkers: function () {
+        return $http.get("http://localhost/projetwebrila/www/markers.php").then(function (response) {
+          markers = response;
+          return markers;
+        });
+
+      }
+    }
+  })
 
 .run(function ($ionicPlatform) {
-  $ionicPlatform.ready(function () {
-    if (window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      cordova.plugins.Keyboard.disableScroll(true);
-    }
-    if (window.StatusBar) {
-      StatusBar.styleDefault();
-    }
-    console.log("début init gmaps");
-  });
-})
-
-.config(function ($stateProvider, $urlRouterProvider) {
-
-  $stateProvider
-    .state('login', {
-      url: '/',
-      templateUrl: 'templates/login.html',
-      controller: 'loginCtrl'
-    })
-    .state('map', {
-      url: '/',
-      templateUrl: 'templates/map.html',
-      controller: 'MapCtrl'
-    })
-    .state('guestmap', {
-      url: '/',
-      templateUrl: 'templates/guestmap.html',
-      controller: 'GuestMapCtrl'
-    });
-  $urlRouterProvider.otherwise("/");
-
-})
-
-.controller('loginCtrl', function ($scope, $state, GoogleMaps, $http, $timeout, $window, $ionicPopup) {
-  console.log("signal controleur login")
-
-  $scope.guestSignIn = function () {
-    $state.go('guestmap');
-    GoogleMaps.init();
-  }
-
-  $scope.login = function (data) {
-    var request = $http({
-      method: "post",
-      url: "http://localhost/projetwebrila/www/db.php",
-      crossDomain: true,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        username: data.username,
-        password: data.password
-      },
-    });
-    request.success(function (res) {
-      if (res.success) {
-        $window.localStorage.setItem("loginStatus", "true");
-        $window.localStorage.setItem("loginUsr", data.username);
-        $timeout(function () {
-          $state.go('map');
-          GoogleMaps.init();
-        }, 2000)
-      } else {
-        $ionicPopup.alert({
-          title: 'Information',
-          template: "Nom d'utilisateur ou mot de passe incorrect"
-        })
+    $ionicPlatform.ready(function () {
+      if (window.cordova && window.cordova.plugins.Keyboard) {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        cordova.plugins.Keyboard.disableScroll(true);
+      }
+      if (window.StatusBar) {
+        StatusBar.styleDefault();
       }
     });
+  })
+  // Redirection vers les différentes pages
+  .config(function ($stateProvider, $urlRouterProvider) {
+    $stateProvider
+      .state('login', {
+        url: '/',
+        templateUrl: 'templates/login.html',
+        controller: 'loginCtrl'
+      })
+      .state('map', {
+        url: '/',
+        templateUrl: 'templates/map.html',
+        controller: 'MapCtrl'
+      })
+      .state('guestmap', {
+        url: '/',
+        templateUrl: 'templates/guestmap.html',
+        controller: 'GuestMapCtrl'
+      });
+    $urlRouterProvider.otherwise("/");
+  })
+
+.controller('loginCtrl', function ($scope, $state, GoogleMaps, $http, $timeout, $window, $ionicPopup) {
+  console.log("controleur login")
+  if ($window.localStorage.getItem("loginStatus") == "true"){
+    console.log("user déjà connecté");
+      $state.go('map');
+      GoogleMaps.init();
+  } else {
+    $scope.guestSignIn = function () {
+      $state.go('guestmap');
+      GoogleMaps.init();
+    }
+    $scope.login = function (data) {
+      var request = $http({
+        method: "post",
+        url: "http://localhost/projetwebrila/www/db.php",
+        crossDomain: true,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {
+          username: data.username,
+          password: data.password
+        },
+      });
+      request.success(function (res) {
+        if (res.success) {
+          $window.localStorage.setItem("loginStatus", "true");
+          $window.localStorage.setItem("loginUsr", data.username);
+          $timeout(function () {
+            $state.go('map');
+            GoogleMaps.init();
+          }, 2000)
+        } else {
+          $ionicPopup.alert({
+            title: 'Information',
+            template: "Nom d'utilisateur ou mot de passe incorrect"
+          })
+        }
+      });
+    }
   }
 })
 
@@ -430,41 +433,6 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
   };
 
-  // Controleur btn signalement
-  $scope.signalement = function () {
-    $scope.map = map;
-    $ionicLoading.show({
-      content: 'Recherche de la position actuelle',
-      showBackdrop: false
-    });
-
-    var options = {
-      timeout: 10000,
-      enableHighAccuracy: true
-    };
-    $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-      var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      var image = 'img/alert.png';
-      var signalAlerte = new google.maps.Marker({
-        map: map,
-        animation: google.maps.Animation.DROP,
-        position: latLng,
-        icon: image
-      });
-      var infoWindow = new google.maps.InfoWindow({
-        content: "Alerte signalée :" + latLng
-
-      });
-      google.maps.event.addListener(signalAlerte, 'click', function (event) {
-        infoWindow.open(map, signalAlerte);
-      })
-      $scope.map.setCenter(latLng);
-      $ionicLoading.hide();
-    }, function (error) {
-      alert('Impossible de vous localiser !' + error.message);
-    });
-  }
-
   // Menu signalement
   $scope.animation = 'slide-in-up';
   $ionicPopover.fromTemplateUrl('templates/menusignalement.html', {
@@ -474,8 +442,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
     $scope.popover = popover;
   });
 
-  // Signalement accident
-  $scope.signalAccident = function () {
+  // Requete signalement 
+  function RequeteSignalement(type, nom, pathicon) {
     $scope.map = map;
     var options = {
       timeout: 10000,
@@ -483,12 +451,11 @@ angular.module('starter', ['ionic', 'ngCordova'])
     };
     $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      var image = 'img/alert.png';
       var signalAlerte = new google.maps.Marker({
         map: map,
         animation: google.maps.Animation.DROP,
         position: latLng,
-        icon: image
+        icon: pathicon
       });
       var infoWindow = new google.maps.InfoWindow({
         content: "Alerte signalée :" + latLng
@@ -506,11 +473,12 @@ angular.module('starter', ['ionic', 'ngCordova'])
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         data: {
-          name: "Accident",
+          name: nom,
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-          typeAlerte: "test",
-          user: $window.localStorage.getItem("loginUsr")
+          typeAlerte: type,
+          user: $window.localStorage.getItem("loginUsr"),
+          icon: pathicon
         },
       });
     });
@@ -518,147 +486,48 @@ angular.module('starter', ['ionic', 'ngCordova'])
       if (res.success) {
         $ionicPopup.alert({
           title: 'Information',
-          template: "Accident signalé avec succès !"
+          template: "Alerte signalée avec succès !"
         })
       } else {
         $ionicPopup.alert({
           title: 'Erreur',
-          template: "Impossible de signaler l'accident"
+          template: "Impossible de signaler l'alerte"
         })
       }
     });
+  };
+
+  // Signalement accident
+  $scope.signalAccident = function () {
+    icon = "img/accident.png";
+    nom = "Accident";
+    type = "Accident";
+    RequeteSignalement(type, nom, icon);
   };
 
   // Signalement radar
   $scope.signalRadar = function () {
-    var request = $http({
-      method: "post",
-      url: "http://localhost/projetwebrila/www/addalert.php",
-      crossDomain: true,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        name: "Radar",
-        lat: "test",
-        lng: "test",
-        typeAlerte: "test",
-        user: $window.localStorage.getItem("loginUsr")
-      },
-    });
-    request.success(function (res) {
-      if (res.success) {
-        $ionicPopup.alert({
-          title: 'Information',
-          template: "Radar signalé avec succès !"
-        })
-      } else {
-        $ionicPopup.alert({
-          title: 'Erreur',
-          template: "Impossible de signaler le Radar"
-        })
-      }
-    });
+    icon = "img/radar.png";
+    nom = "Radar";
+    type = "Radar";
+    RequeteSignalement(type, nom, icon);
   };
 
   // Signalement trafic
   $scope.signalTrafic = function () {
-    var request = $http({
-      method: "post",
-      url: "http://localhost/projetwebrila/www/addalert.php",
-      crossDomain: true,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        name: "Trafic",
-        lat: "test",
-        lng: "test",
-        typeAlerte: "test",
-        user: $window.localStorage.getItem("loginUsr")
-      },
-    });
-    request.success(function (res) {
-      if (res.success) {
-        $ionicPopup.alert({
-          title: 'Information',
-          template: "Trafic signalé avec succès !"
-        })
-      } else {
-        $ionicPopup.alert({
-          title: 'Erreur',
-          template: "Impossible de signaler le Trafic"
-        })
-      }
-    });
+    icon = "img/trafic.png";
+    nom = "Trafic";
+    type = "Trafic";
+    RequeteSignalement(type, nom, icon);
   };
 
   // Signalement autre
   $scope.signalOther = function () {
-    var request = $http({
-      method: "post",
-      url: "http://localhost/projetwebrila/www/addalert.php",
-      crossDomain: true,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        name: "Accident",
-        lat: "test",
-        lng: "test",
-        typeAlerte: "test",
-        user: $window.localStorage.getItem("loginUsr")
-      },
-    });
-    request.success(function (res) {
-      if (res.success) {
-        $ionicPopup.alert({
-          title: 'Information',
-          template: "Accident signalé avec succès !"
-        })
-      } else {
-        $ionicPopup.alert({
-          title: 'Erreur',
-          template: "Impossible de signaler l'accident"
-        })
-      }
-    });
+    icon = "img/alert.png";
+    nom = "Autre";
+    type = "Autre";
+    RequeteSignalement(type, nom, icon);
   };
-
-  // Signalement autre
-  $scope.signalOther = function () {
-    var request = $http({
-      method: "post",
-      url: "http://localhost/projetwebrila/www/addalert.php",
-      crossDomain: true,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        name: "Accident",
-        lat: "test",
-        lng: "test",
-        typeAlerte: "test",
-        user: $window.localStorage.getItem("loginUsr")
-      },
-    });
-    request.success(function (res) {
-      if (res.success) {
-        $ionicPopup.alert({
-          title: 'Information',
-          template: "Accident signalé avec succès !"
-        })
-      } else {
-        $ionicPopup.alert({
-          title: 'Erreur',
-          template: "Impossible de signaler l'accident"
-        })
-      }
-    });
-  };
-
-
-
 
   // Side menu (ouverture et fermeture)
   $scope.openMenu = function () {
