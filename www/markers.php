@@ -6,7 +6,7 @@
   $result = "{'success':false}";
  
   //Select everything from the table containing the marker informaton
-  $query = "SELECT * FROM testmarqueurs";
+  $query = "SELECT * FROM marqueurs";
  
   //Run the query
   $dbresult = $mysqli->query($query);

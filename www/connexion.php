@@ -24,7 +24,7 @@
     $password = $request->password;
     $username = $request->username;
 
-    $result = $databaseConnection->prepare("SELECT * FROM testusers WHERE username= :usr AND password= :pw");
+    $result = $databaseConnection->prepare("SELECT * FROM users WHERE username= :usr AND password= :pw");
     $result->bindParam(':usr', $username);
     $result->bindParam(':pw', $password);
     $result->execute();

@@ -16,38 +16,32 @@
 				<div id="map" data-tap-disabled="true"></div>
 				<input class="dp-places-map-input" id="pac-input" placeholder="Rechercher un emplacement" style="z-index: 0; position: absolute; left: 113px; top: 0px;" type="text">
 
-			</ion-content>
-			<ion-footer-bar class="bar-balanced">
-				<a ng-click="centerOnMe()" class="button button-icon icon ion-navigate"> Localiser</a>
-				<a ng-click="popover.show($event)" class="button button-icon icon ion-alert"> Signaler</a>
-			</ion-footer-bar>
-		</ion-side-menu-content>
-		<!-- Contenu du side menu -->
-		<ion-side-menu side="left">
-			<ion-header-bar class="bar bar-header bar-balanced">
-				<h1 class="title">Menu</h1>
-			</ion-header-bar>
-			<ion-content>
-				<!--<div class="item item-input">
-					<i class="icon ion-search placeholder-icon"></i>
-					<input type="text"  placeholder="Recherchez un emplacement" data-tap-disabled="true" ng-change='disableTap()'
-						ng-model="search">
-				</div>-->
-				<div class="list">
-					<div class="item">
-						<a ng-click="logout()" menu-close class="button button-icon icon-left ion-ios-home">Déconnexion </a>
-					</div>
-					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-android-settings">Paramètres</a>
-					</div>
-					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-person">Mon Compte</a>
-					</div>
-					<div class="item">
-						<a menu-close class="button button-icon icon-left ion-flag">Autre</a>
-					</div>
-				</div>
-			</ion-content>
-		</ion-side-menu>
-	</ion-side-menus>
+</ion-content>
+<ion-footer-bar class="bar-balanced">
+	<a ng-click="centerOnMe()" class="button button-icon icon ion-navigate"> Localiser</a>
+	<a ng-click="popover.show($event)" class="button button-icon icon ion-alert"> Signaler</a>
+</ion-footer-bar>
+</ion-side-menu-content>
+<!-- Contenu du side menu -->
+<ion-side-menu side="left">
+	<ion-header-bar class="bar bar-header bar-balanced">
+		<h1 class="title">Menu</h1>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list">
+			<div class="item">
+				<a ng-click="logout()" menu-close class="button button-icon icon-left ion-ios-home">Déconnexion </a>
+			</div>
+		</div>
+		<div class="item item-input">
+			<i class="icon ion-search placeholder-icon"></i>
+			<input type="text" placeholder="Départ" data-tap-disabled="true" ng-change='disableTap()' ng-model="search">
+		</div>
+		<div class="item item-input">
+			<i class="icon ion-search placeholder-icon"></i>
+			<input type="text" placeholder="Destination" data-tap-disabled="true" ng-change='disableTap()' ng-model="search">
+		</div>
+	</ion-content>
+</ion-side-menu>
+</ion-side-menus>
 </ion-view>

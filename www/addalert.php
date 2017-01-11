@@ -28,7 +28,7 @@
     $user = $request->user;
     $icon = $request->icon;
 
-    $result = $databaseConnection->prepare("INSERT INTO testmarqueurs (name, lat, lng, typeAlerte, user, icon) VALUES (:name, :lat, :lng, :typeAlerte, :user, :icon)");
+    $result = $databaseConnection->prepare("INSERT INTO marqueurs (name, lat, lng, typeAlerte, user, icon) VALUES (:name, :lat, :lng, :typeAlerte, :user, :icon)");
     $result->bindParam(':name', $name);
     $result->bindParam(':lat', $lat);
     $result->bindParam(':lng', $lng);

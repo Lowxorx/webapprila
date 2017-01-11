@@ -391,7 +391,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         $ionicLoading.hide();
 
         var infoWindow = new google.maps.InfoWindow({
-          content: "test"
+          content: "Position actuelle"
         });
         google.maps.event.addListener(positionActuelle, 'click', function (event) {
           infoWindow.open(map, positionActuelle);
@@ -417,7 +417,6 @@ angular.module('starter', ['ionic', 'ngCordova'])
         });
         $state.go('login');
       }, 30);
-
     };
 
     // Menu signalement
