@@ -3,7 +3,7 @@
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST');
 
-    define('_HOST_NAME_', 'localhost');
+    define('_HOST_NAME_', 'localhost'); // localhost:1080 / 192.168.25.113
     define('_USER_NAME_', 'root');
     define('_DB_PASSWORD', '');
     define('_DATABASE_NAME_', 'projetwebrila');
