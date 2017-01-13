@@ -242,7 +242,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
                     position: markerPos
                 });
 
-                var infoWindowContent = "<h4>" + record.name + " - " + record.typeAlerte + " - " + record.user + "</h4>";
+                var infoWindowContent = "<h4>" + record.name + "</h4><br><h5>Type d'alerte : " + record.typeAlerte + "</h5><br>" + "Signalé par " + record.user;
                 addInfoWindow(marker, infoWindowContent);
             }
         });
@@ -316,7 +316,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     var markers = [];
     return {
         getMarkers: function() {
-            return $http.get("http://localhost/projetwebrila/www/markers.php").then(function(response) {
+            return $http.get("http://localhost/projetwebrila/www/php/markers.php").then(function(response) {
                 markers = response;
                 return markers;
             });
@@ -372,7 +372,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         $scope.login = function(data) {
             var request = $http({
                 method: "post",
-                url: "http://localhost/projetwebrila/www/connexion.php",
+                url: "http://localhost/projetwebrila/www/php/connexion.php",
                 crossDomain: true,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -401,7 +401,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }
 })
 
-.controller('MapCtrl', function($scope, $rootScope, $document, $window, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $window, $http) {
+.controller('MapCtrl', function($scope, $rootScope, $document, $window, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $http) {
     console.log('ctrl map');
 
     // Afficher ou masquer le panel de choix d'itinéraire
@@ -528,7 +528,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
             $scope.map.setCenter(latLng);
             var request = $http({
                 method: "post",
-                url: "http://localhost/projetwebrila/www/addalert.php",
+                url: "http://localhost/projetwebrila/www/php/addalert.php",
                 crossDomain: true,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -561,7 +561,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // Signalement accident
     $scope.signalAccident = function() {
         icon = "img/accident.png";
-        nom = "Accident";
+        nom = "Accident de la route";
         type = "Accident";
         RequeteSignalement(type, nom, icon);
     };
@@ -569,7 +569,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // Signalement radar
     $scope.signalRadar = function() {
         icon = "img/radar.png";
-        nom = "Radar";
+        nom = "Radar Fixe";
         type = "Radar";
         RequeteSignalement(type, nom, icon);
     };
@@ -577,7 +577,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // Signalement trafic
     $scope.signalTrafic = function() {
         icon = "img/trafic.png";
-        nom = "Trafic";
+        nom = "Trafic Important";
         type = "Trafic";
         RequeteSignalement(type, nom, icon);
     };
@@ -585,7 +585,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // Signalement autre
     $scope.signalOther = function() {
         icon = "img/alert.png";
-        nom = "Autre";
+        nom = "Autre Alerte";
         type = "Autre";
         RequeteSignalement(type, nom, icon);
     };
@@ -607,8 +607,48 @@ angular.module('starter', ['ionic', 'ngCordova'])
     };
 })
 
-.controller('GuestMapCtrl', function($scope, $state, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopup, $ionicSideMenuDelegate) {
+.controller('GuestMapCtrl', function($scope, $rootScope, $document, $window, $ionicLoading, $ionicPopup, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $http) {
     console.log('ctrl guestmap');
+
+    // Afficher ou masquer le panel de choix d'itinéraire
+    var initialState = false;
+    $scope.routeDiv = initialState;
+
+    $scope.showHideRoute = function() {
+        $scope.routeDiv = !$scope.routeDiv;
+    }
+
+    // Préparation des item pour l'itinéraire
+    $scope.getItineraire = function() {
+        console.log("getItineraire");
+
+        $rootScope.directionsDisplay.setMap(map);
+        var destination = $window.localStorage.getItem("routeDestination");
+        var depart = $window.localStorage.getItem("routeOrigine");
+        calculateAndDisplayRoute($rootScope.directionsService, $rootScope.directionsDisplay, destination, depart);
+    }
+
+    // Calcul et affichage de l'itinéraire
+    function calculateAndDisplayRoute(directionsService, directionsDisplay, destination, depart) {
+        console.log("calcul itineraire");
+        console.log(destination);
+        console.log(depart);
+
+        directionsService.route({
+            origin: depart,
+            destination: destination,
+            travelMode: google.maps.TravelMode.DRIVING
+        }, function(response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsDisplay.setDirections(response);
+                directionsDisplay.setPanel(document.getElementById('directionsList'));
+
+            } else {
+                window.alert('Erreur google map : ' + status);
+            }
+        });
+    }
+
     $scope.centerOnMe = function() {
         $scope.map = map;
         $ionicLoading.show({
@@ -624,6 +664,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
             var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             var positionActuelle = new google.maps.Marker({
                 map: map,
+                icon: "img/marker.png",
                 animation: google.maps.Animation.DROP,
                 position: latLng
             });
@@ -631,13 +672,13 @@ angular.module('starter', ['ionic', 'ngCordova'])
             $ionicLoading.hide();
 
             var infoWindow = new google.maps.InfoWindow({
-                content: "Position Actuelle"
+                content: "Position actuelle"
             });
             google.maps.event.addListener(positionActuelle, 'click', function(event) {
                 infoWindow.open(map, positionActuelle);
             })
         }, function(error) {
-            alert('Unable to get location: ' + error.message);
+            alert('Impossible de vous localiser !' + error.message);
         });
     }
 

@@ -1,6 +1,11 @@
 <?php
+  //Set these headers to avoid any issues with cross origin resource sharing issues
+  header('Access-Control-Allow-Origin: *');
+  header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+  header('Access-Control-Allow-Headers: Content-Type,x-prototype-version,x-requested-with');
+  
   //Create a connection to the database
-  $mysqli = new mysqli("localhost", "root", "", "projetwebrila");
+  $mysqli = new mysqli("212.129.41.100:16081", "projetweb", "Projetwebrila2016", "projetwebrila");
  
   //The default result to be output to the browser
   $result = "{'success':false}";
@@ -36,10 +41,7 @@
     $result = "{\"success\":false}";
   }
  
-  //Set these headers to avoid any issues with cross origin resource sharing issues
-  header('Access-Control-Allow-Origin: *');
-  header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-  header('Access-Control-Allow-Headers: Content-Type,x-prototype-version,x-requested-with');
+
  
   //Output the result to the browser so that our Ionic application can see the data
   echo($result);
