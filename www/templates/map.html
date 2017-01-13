@@ -35,19 +35,22 @@
                 </div>
                 <div class="list">
                     <div class="item">
-                        <a ng-click="show = 1" class="button button-icon icon-left ion-ios-home">Itinéraire </a>
+                        <a ng-click="showHideRoute()" class="button button-icon icon-left ion-ios-home">Itinéraire </a>
                     </div>
-                    <form name="destform" ng-show="show==1">
-                        <div class="item item-input">
-                            <i class="icon ion-search placeholder-icon"></i>
-                            <input id="routefield" name="depart" type="text" ng-model="dest.depart" placeholder="Départ" data-tap-disabled="true" required></input>
-                        </div>
-                        <div class="item item-input">
-                            <i class="icon ion-search placeholder-icon"></i>
-                            <input id="destfield" name="destination" type="text" ng-model="dest.destination" placeholder="Destination" data-tap-disabled="true" required></input>
-                        </div>
+                    <div ng-show="routeDiv">
+                        <form name="destform">
+                            <div class="item item-input">
+                                <i class="icon ion-search placeholder-icon"></i>
+                                <input id="routefield" name="depart" type="text" ng-model="dest.depart" placeholder="Départ" data-tap-disabled="true" required></input>
+                            </div>
+                            <div class="item item-input">
+                                <i class="icon ion-search placeholder-icon"></i>
+                                <input id="destfield" name="destination" type="text" ng-model="dest.destination" placeholder="Destination" data-tap-disabled="true" required></input>
+                            </div>
+                        </form>
                         <button class="button button-block button-balanced" ng-disabled="destform.$invalid" ng-click="getItineraire()">Calcul d'itinéraire</button>
-                    </form>
+                        <div id="directionsList" class="panel panel-primary"></div>
+                    </div>
                 </div>
             </ion-content>
         </ion-side-menu>

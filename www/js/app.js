@@ -8,11 +8,21 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
     function initMap() {
         console.log("fonction initMap");
+
+        // Option pour la carte principale
         var options = {
             timeout: 10000,
             enableHighAccuracy: true
         };
 
+        console.log("initialisation de l'itinéraire")
+            // Instance des objets pour le calcul d'itinéraire
+        var directionsService;
+        var directionsDisplay;
+        $rootScope.directionsService = new google.maps.DirectionsService();
+        $rootScope.directionsDisplay = new google.maps.DirectionsRenderer();
+
+        // Affichage de la position actuelle
         $cordovaGeolocation.getCurrentPosition(options).then(function(position) {
             var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             var mapOptions = {
@@ -35,7 +45,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
                 // Ajout de marqueurs à la liste des marqueurs utilisateur
                 markers.push(marker);
                 clicInfoWindow.setContent('<div><strong>Position personnalisée</strong><br>' +
-                    'GPS: ' + event.latLng + '<br>');
+                    'GPS : ' + event.latLng + '<br>');
                 clicInfoWindow.open(map, marker);
             });
             var input = /** @type {HTMLInputElement} */ (
@@ -45,7 +55,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
             autocomplete.bindTo('bounds', window.map);
             var infowindow = new google.maps.InfoWindow();
             var marker = new google.maps.Marker({
-                map: map
+                map: map,
+                icon: "img/marker.png"
             });
             var dest = /** @type {HTMLInputElement} */ (
                 document.getElementById('destfield'));
@@ -86,8 +97,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
                 }));
                 marker.setVisible(true);
                 infowindow.setContent('<div><strong>' + place.name + '</strong><br>' +
-                    'Place ID: ' + place.place_id + '<br>' +
-                    place.formatted_address + '</div>');
+                    'Adresse : ' + place.formatted_address + '<br> </div>');
                 infowindow.open(map, marker);
             });
             // Chargement de la map
@@ -139,7 +149,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
         script.type = "text/javascript";
         script.id = "googleMaps";
 
-        // On ajoute un callback à l'url de chargement de la map
+        // On ajoute un callback à l'url de chargement de la map pour charger la page une fois le sdk google chargé
         if (apiKey) {
             script.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey +
                 '&libraries=places,geometry&callback=mapInit';
@@ -391,20 +401,28 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }
 })
 
-.controller('MapCtrl', function($scope, $window, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $window, $http) {
+.controller('MapCtrl', function($scope, $rootScope, $document, $window, $ionicLoading, $cordovaGeolocation, $compile, $ionicPopover, $ionicSideMenuDelegate, $state, $timeout, $ionicHistory, $window, $http) {
     console.log('ctrl map');
 
-    // Instance des objets pour le calcul d'itinéraire
-    $scope.getItineraire = function() {
-        console.log("getItineraire");
-        var directionsService = new google.maps.DirectionsService;
-        var directionsDisplay = new google.maps.DirectionsRenderer;
-        directionsDisplay.setMap(map);
-        var destination = $window.localStorage.getItem("routeDestination");
-        var depart = $window.localStorage.getItem("routeOrigine");
-        calculateAndDisplayRoute(directionsService, directionsDisplay, destination, depart);
+    // Afficher ou masquer le panel de choix d'itinéraire
+    var initialState = false;
+    $scope.routeDiv = initialState;
+
+    $scope.showHideRoute = function() {
+        $scope.routeDiv = !$scope.routeDiv;
     }
 
+    // Préparation des item pour l'itinéraire
+    $scope.getItineraire = function() {
+        console.log("getItineraire");
+
+        $rootScope.directionsDisplay.setMap(map);
+        var destination = $window.localStorage.getItem("routeDestination");
+        var depart = $window.localStorage.getItem("routeOrigine");
+        calculateAndDisplayRoute($rootScope.directionsService, $rootScope.directionsDisplay, destination, depart);
+    }
+
+    // Calcul et affichage de l'itinéraire
     function calculateAndDisplayRoute(directionsService, directionsDisplay, destination, depart) {
         console.log("calcul itineraire");
         console.log(destination);
@@ -417,6 +435,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
         }, function(response, status) {
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsDisplay.setDirections(response);
+                directionsDisplay.setPanel(document.getElementById('directionsList'));
+
             } else {
                 window.alert('Erreur google map : ' + status);
             }
