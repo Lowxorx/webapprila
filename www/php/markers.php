@@ -1,49 +1,49 @@
 <?php
-  //Set these headers to avoid any issues with cross origin resource sharing issues
-  header('Access-Control-Allow-Origin: *');
-  header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-  header('Access-Control-Allow-Headers: Content-Type,x-prototype-version,x-requested-with');
-  
-  //Create a connection to the database
-  $mysqli = new mysqli("212.129.41.100:16081", "projetweb", "Projetwebrila2016", "projetwebrila");
- 
-  //The default result to be output to the browser
-  $result = "{'success':false}";
- 
-  //Select everything from the table containing the marker informaton
-  $query = "SELECT * FROM marqueurs";
- 
-  //Run the query
-  $dbresult = $mysqli->query($query);
- 
-  //Build an array of markers from the result set
-  $markers = array();
- 
-  while($row = $dbresult->fetch_array(MYSQLI_ASSOC)){
- 
-    $markers[] = array(
-      'id' => $row['id'],
-      'name' => $row['name'],
-      'lat' => $row['lat'],
-      'lng' => $row['lng'],
-      'typeAlerte' => $row['typeAlerte'],
-      'user' => $row['user'],
-      'icon' => $row['icon']
-    );
-  }
- 
+    header("Content-Type: application/json; charset=UTF-8");
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST');
+
+    define('_HOST_NAME_', '212.129.41.100');
+    define('_PORT_NUMBER_', '16081');
+    define('_USER_NAME_', 'projetweb');
+    define('_DB_PASSWORD', 'Projetwebrila2016');
+    define('_DATABASE_NAME_', 'projetwebrila');
+    
+    try
+    {
+        $databaseConnection = new PDO('mysql:host='._HOST_NAME_.';port='._PORT_NUMBER_.';dbname='._DATABASE_NAME_, _USER_NAME_, _DB_PASSWORD);
+        $databaseConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } 
+    catch(PDOException $e) 
+    {
+        echo 'ERROR: ' . $e->getMessage();
+    }
+
+    
+    $result = "{\"success\":false}";
+
+    $result = $databaseConnection->prepare("SELECT * FROM marqueurs");
+    $result->execute();
+
+    while($row = $result->fetch(PDO::FETCH_ASSOC))
+    {
+        $markers[] = array(
+        'id' => $row['id'],
+        'name' => $row['name'],
+        'lat' => $row['lat'],
+        'lng' => $row['lng'],
+        'typeAlerte' => $row['typeAlerte'],
+        'user' => $row['user'],
+        'icon' => $row['icon']
+        );
+    }
   //If the query was executed successfully, create a JSON string containing the marker information
-  if($dbresult){
+  if($result){
     $result = "{\"success\":true, \"markers\":" . json_encode($markers) . "}";        
   }
   else
   {
     $result = "{\"success\":false}";
   }
- 
-
- 
-  //Output the result to the browser so that our Ionic application can see the data
-  echo($result);
- 
+    echo($result)
 ?>
