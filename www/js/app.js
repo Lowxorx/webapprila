@@ -236,7 +236,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
                 // On les ajoute a la map
                 var marker = new google.maps.Marker({
-                    setMap : map,
+                    map: map,
                     icon: image,
                     animation: google.maps.Animation.DROP,
                     position: markerPos
