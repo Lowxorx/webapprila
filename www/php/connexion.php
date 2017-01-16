@@ -25,7 +25,7 @@
     $request = json_decode($postdata);
     $password = $request->password;
     $username = $request->username;
-
+    var_dump($password);
     $result = $databaseConnection->prepare("SELECT * FROM users WHERE username= :usr AND password= :pw");
     $result->bindParam(':usr', $username);
     $result->bindParam(':pw', $password);
