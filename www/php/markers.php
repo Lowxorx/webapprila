@@ -4,8 +4,8 @@
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST');
 
-    define('_HOST_NAME_', '192.168.1.118');
-    define('_PORT_NUMBER_', '3306');
+    define('_HOST_NAME_', '212.129.41.100');
+    define('_PORT_NUMBER_', '16081');
     define('_USER_NAME_', 'projetweb');
     define('_DB_PASSWORD', 'Projetwebrila2016');
     define('_DATABASE_NAME_', 'projetwebrila');
