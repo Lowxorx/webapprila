@@ -1,4 +1,6 @@
 <?php
+
+// Ajout d'une alerte en BDD
     header("Content-Type: application/json; charset=UTF-8");
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST');
@@ -16,7 +18,7 @@
     } 
     catch(PDOException $e) 
     {
-        echo 'ERROR: ' . $e->getMessage();
+        echo 'Erreur addalert : ' . $e->getMessage();
     }
 
     
