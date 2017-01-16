@@ -4,15 +4,17 @@
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST');
 
-    define('_HOST_NAME_', '212.129.41.100');
-    define('_PORT_NUMBER_', '16081');
+    // define('_HOST_NAME_', '212.129.41.100');
+    // define('_PORT_NUMBER_', '16081');
+    define('_HOST_NAME_', 'localhost');
     define('_USER_NAME_', 'projetweb');
     define('_DB_PASSWORD', 'Projetwebrila2016');
     define('_DATABASE_NAME_', 'projetwebrila');
     
     try
     {
-        $databaseConnection = new PDO('mysql:host='._HOST_NAME_.';port='._PORT_NUMBER_.';dbname='._DATABASE_NAME_, _USER_NAME_, _DB_PASSWORD);
+        // $databaseConnection = new PDO('mysql:host='._HOST_NAME_.';port='._PORT_NUMBER_.';dbname='._DATABASE_NAME_, _USER_NAME_, _DB_PASSWORD);
+        $databaseConnection = new PDO('mysql:host='._HOST_NAME_.';dbname='._DATABASE_NAME_, _USER_NAME_, _DB_PASSWORD);
         $databaseConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } 
     catch(PDOException $e) 
