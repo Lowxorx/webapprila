@@ -682,16 +682,101 @@ angular.module('starter', ['ionic', 'ngCordova'])
         });
     }
 
-    // Bouton signalement
-    $scope.showAlert = function() {
-        var alertPopup = $ionicPopup.alert({
-            title: 'Information',
-            template: 'Vous devez vous connecter pour signaler un évènement.'
+    // Menu signalement
+    $scope.animation = 'slide-in-up';
+    $ionicPopover.fromTemplateUrl('templates/menusignalement.html', {
+        scope: $scope,
+        animation: $scope.animation
+    }).then(function(popover) {
+        $scope.popover = popover;
+    });
+
+    // Requete signalement 
+    function RequeteSignalement(type, nom, pathicon) {
+        $scope.map = map;
+        var options = {
+            timeout: 10000,
+            enableHighAccuracy: true
+        };
+        $cordovaGeolocation.getCurrentPosition(options).then(function(position) {
+            var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            var signalAlerte = new google.maps.Marker({
+                map: map,
+                animation: google.maps.Animation.DROP,
+                position: latLng,
+                icon: pathicon
+            });
+            var infoWindow = new google.maps.InfoWindow({
+                content: "Alerte signalée :" + latLng
+
+            });
+            google.maps.event.addListener(signalAlerte, 'click', function(event) {
+                infoWindow.open(map, signalAlerte);
+            })
+            $scope.map.setCenter(latLng);
+            var request = $http({
+                method: "post",
+                url: "http://localhost/projetwebrila/www/php/addalert.php",
+                crossDomain: true,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                data: {
+                    name: nom,
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    typeAlerte: type,
+                    user: "anonyme",
+                    icon: pathicon
+                },
+            });
         });
-        alertPopup.then(function(res) {
-            console.log('après popup');
+        request.success(function(res) {
+            if (res.success) {
+                $ionicPopup.alert({
+                    title: 'Information',
+                    template: "Alerte signalée avec succès !"
+                })
+            } else {
+                $ionicPopup.alert({
+                    title: 'Erreur',
+                    template: "Impossible de signaler l'alerte"
+                })
+            }
         });
-    }
+    };
+
+    // Signalement accident
+    $scope.signalAccident = function() {
+        icon = "img/accident.png";
+        nom = "Accident de la route";
+        type = "Accident";
+        RequeteSignalement(type, nom, icon);
+    };
+
+    // Signalement radar
+    $scope.signalRadar = function() {
+        icon = "img/radar.png";
+        nom = "Radar Fixe";
+        type = "Radar";
+        RequeteSignalement(type, nom, icon);
+    };
+
+    // Signalement trafic
+    $scope.signalTrafic = function() {
+        icon = "img/trafic.png";
+        nom = "Trafic Important";
+        type = "Trafic";
+        RequeteSignalement(type, nom, icon);
+    };
+
+    // Signalement autre
+    $scope.signalOther = function() {
+        icon = "img/alert.png";
+        nom = "Autre Alerte";
+        type = "Autre";
+        RequeteSignalement(type, nom, icon);
+    };
 
     // Bouton connexion
     $scope.showLogin = function() {
